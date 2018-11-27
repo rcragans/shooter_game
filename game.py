@@ -9,9 +9,11 @@ bad_guy = BadGuy()
 bad_guys = Group()
 bad_guys.add(bad_guy)
 from Arrow import Arrow
+from Button import Start_Button
 arrows = Group()
 screen_size = (512,480)
 pygame_screen = pygame.display.set_mode(screen_size)
+start_button = Start_Button(pygame_screen)
 pygame.display.set_caption('Robin Hood')
 background_image = pygame.image.load('background.png')
 theHero.draw_me(512,480)
@@ -20,6 +22,7 @@ goblin_image = pygame.image.load('goblin.png')
 monster_image = pygame.image.load('monster.png')
 arrow_image = pygame.image.load('arrow.png')
 game_on = True
+game_start = False
 while game_on:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -44,20 +47,30 @@ while game_on:
             if event.key == 273:
                 theHero.shouldMove("up",False)
             elif event.key == 274:
-                theHero.shouldMove("down",False)        
+                theHero.shouldMove("down",False)
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            if start_button.rect.collidepoint(mouse_x, mouse_y):
+                game_start = True
+                bg_music = pygame.mixer.Sound('faf.wav')
+                bg_music.play()
     pygame_screen.blit(background_image,[0,0])
-    theHero.draw_me(512,480)
-    for bad_guy in bad_guys:
-        bad_guy.move_me(theHero)
-        pygame_screen.blit(monster_image, [bad_guy.x, bad_guy.y])
-    for arrow in arrows:
-        arrow.update_me()
-        pygame_screen.blit(arrow_image,[arrow.x, arrow.y])
-    pygame_screen.blit(hero_image,[theHero.x, theHero.y])
-    arrow_hit = groupcollide(arrows, bad_guys, True, True)
-    if arrow_hit:
-        bad_guys.add(BadGuy())
+    if game_start == True:
+        theHero.draw_me(512,480)
+        for bad_guy in bad_guys:
+            bad_guy.move_me(theHero)
+            pygame_screen.blit(monster_image, [bad_guy.x, bad_guy.y])
+        for arrow in arrows:
+            arrow.update_me()
+            pygame_screen.blit(arrow_image,[arrow.x, arrow.y])
+        pygame_screen.blit(hero_image,[theHero.x, theHero.y])
+        arrow_hit = groupcollide(arrows, bad_guys, True, True)
+        if arrow_hit:
+            bad_guys.add(BadGuy())
     pygame_screen.blit(monster_image,[bad_guy.x, bad_guy.y])
+    if game_start == False:
+        start_button.setup_message()
+        start_button.draw_button()
     pygame.display.flip()
 
     
